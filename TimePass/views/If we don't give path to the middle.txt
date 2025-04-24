@@ -1,0 +1,4 @@
+If we don't give path to the middleware then it will give response to every root ->Actually it is considered for default root.
+--For every child root of path it will give response
+--It is oftenly used while giving authentication/validation layer om a particular page/pages and dealing with api
+--Middlewares are also used to show page not found at last of the code above app.listen.

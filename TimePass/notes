@@ -1,0 +1,213 @@
+Router : 
+ Router is an object inside express which helps in bringing modularity to the code.
+ If we want encoded information from app.js to router then we have to use express.Router({mergeParams : true});
+ export the router
+
+Cookies : 
+ Cookie is a chunk of information which is sent to the client from the server through browser.
+ Necessary information is stored which can be used by every route such as username, darkmode/lightmode, etc
+ To send cookie : res.cookie("name" , "Vedant");
+ To Access and Parse cookies : 
+  1. install cookie-parser and require it.
+  2. app.use(cookieParser());
+  3. console.dir(req.cookies);
+  example : 
+  let {name = "anynomous"} = req.cookies;
+  res.send(`Welcome ${name}`);
+
+  To Send Signed Cookies 
+  1. Add some message to cookieParser() :- app.use(cookieParser("SecretCode));
+  2. cookie.send("color", "red", {signed : true});
+  3. Now the value is now non-raw format but still readable
+  4. The req.cookie holds only unsigned cookies. For signed cookies we get from req.signedCookies.
+  5. For verification : 
+             1. If whole value is changed then signed cookie will be invalid and no longer be available in the req.signedCookies. You can still see it in req.cookies.
+             2. If only the content of the signed cookie is changed then it is still signed but value displayed will  be  false.
+
+Session : 
+  One single interaction between server with client.
+  A session has a cookie
+Protocol : 
+  The rules followed by req,res.
+2 types of protocols : statefull and stateless protocols.
+
+Statefull Protocol : 
+  Requires server to save status and session information.
+  Example : Amazon cart. || UPI transaction 
+  FTP : File transfer Protocol
+
+Stateless Protocol : 
+  Does not require server to retain the server information or 
+  Example : The coding we done yet. || Cash transacton : no information related to it
+  HTTP 
+
+Express Session : (npm package : express-session)
+ An attempt to make our sessions stateful.
+ Creates a session ( guest account) before loging in. We can still add items to the cart.
+ This sessions are created on server side.
+ Express session sends session Id to the client (browser with cookies).
+ In this way cookies are used to send id and then id can be used to fetch session data from server.
+ When page changes( routes changes within the web) with the help of cookie, information in cart is still saved.
+ This information is not saved in databases because it is not final. Temporary storage is used to save this information.
+ This information is not stored directly to the client because : Cookie size are limited compared to temporary storage  and not secure. We only stored session ID in cookie.
+ If there are different tabs in same browser, they have same session Id.
+ Different browsers have different session Id.
+ Currently the sessions are stored in memoryStore which is purposely not designed for a production Environment.  
+
+ const session = require("express-session");
+ app.use(
+    session({
+        secret : "thisIsMySecret",               // This string has to be strong like a password.
+        resave : false,
+
+    })
+ )
+
+
+ connect-flash:
+  Special arera of the session used for storing messages.
+  Messages are written to the flash and cleared after being displayed to the user.
+  Session is required to use connect-flash. Hence write flash middleware after session creation.
+  flash middleware should be used before all the routes.
+  session---> flash Middleware --> All Routes
+
+res.locals :
+ res.locals deals with the files such as embedded JavaScript. It can be automatically called in ejs without rendering.
+ The variable created at res.locals is an array which defaultly empty and later stores value of flash when flash messages are called from route. [ example- res.locals.successMsg = req.flash("Success");]
+
+Cookies in Session :
+ cookie expires when session expires by default. To avoid it we have to set time for which cookie stores after session.
+ Hence we have to use cookie in the session.
+
+Authentication : 
+   The process of verifying who someone is.
+
+Authorization : 
+  The process of verifying what specific applications, files, and data a user has access to
+
+Hash Function : 
+  If data of a website is leaked then login details are still safe due to hash function.
+  User id and password is passed to hash function which converts it into unreadable string.
+  while reloging, the id and password is changed through hashing function and then the unreadable value is compared.
+  1. For every input there is a fix output.
+  2. They are one-way functions, we can't get input from output. They are like modulus function. 
+  3. For different inputs, there is a different output of same length.
+  4. Small changes in input should bring large changes in output.
+
+Salting : 
+ Adding 32/other character string to the password before hashing with hash code to make it strong.
+
+Passport : Middleware package
+ passport local mongoose automatically does hashing and salting if plugin is used. It also creates username and password feild in defining schema automatically.
+ Passport uses session
+ passport
+ passport-local
+ Use passport-local-mongoose for dealing with mongoose better
+
+Configuring stratergies for using methods of passport plugins:
+After defining schema :  UserSchema.plugin(passporLocalMongoose);
+In app.js :-
+ 1. require passport
+ 2. reqire passport-local as LocalStrategy
+ 3. reqire model.
+After declaration of the session do the following : 
+1) app.use(passport.initialize())
+2) app.use(passport.session())          // To tell the web application that the the same user is sending the requests 
+                                           many times so He dont need to log in again and again.
+3) passport.use(new LocalStrategy(User.authenticate()));
+   passport.serializeUser(User.serializeUser());
+   passport.deserializeUser(User.deserializeUser());
+   
+# Creating a demo user : 
+1. Create an object(example :fakeUser) with email, username as elements.
+2. User User.register(fakeUser, "This is password");
+
+Register method automatically checks the user is there already or not.
+
+* In passport pbkdf2 hashing algorithm is used.
+
+** We used try catch in posting of a user to handle "Username already used"
+
+** You need to use return keyword while using an conditional statement like in authentication.
+
+Methods inside passport :=
+ They have a callback in which we can store variables such as err.
+  1. req.login --> Takes details from current user data and log in it.
+  2. req.logout --> Clears req.user and thus clear the log in session.
+
+*We have used res.locals to access current user at ejs. We done this to use signin, login, logout in proper manner.
+
+## Post-loginPage :
+ Actually when we try to do something on the website and then login page pop ups, we logins and then we want to continue that particular task only. In this scenario :
+   We have "req.path" and "req.originalUrl" in the request. ex : /new
+   1. req.path gives relative url (current route) ex : /listing/new
+   2. req.originalUrl gives 
+ Workflow :- 1. create parameter in session when authentication fails
+             2. Use this parameter to redirect after login
+             3. Normally, this could work but passport resets session once log in.
+             4. To solve this problem, we use a middleware to store the session parameter in which we stored our req.originalUrl in req.locals variable.
+             * From manual login, this will not work hence we used "or" operator in the code . (ctrl + f ==> ||)
+             5. Now, you can add owner in show.ejs too. add owner in listingSchema (->Add owner of default listing by maping function in init>index.js.)
+             
+  
+
+## Authorization 
+ We have stored req.user as res.locals.currUser to use it in ejs.
+ use '.equals' function to compare id.
+1. In show route, show edit and delete button only if listing.owner._id === res.locals.currUser._id;
+   Still, anyone can edit through post request from hopscotch.
+
+2. We have to make the authorization for all request( manual + hoppscotch/postman Api/etc). 
+For listing
+  i. Create a new middleware for this : isOwner
+  ii. Apply conditions, use : listing.owner.equals(currUser._id);
+
+
+
+## MVC : Model, View, Controllers
+-- Created model, view and controllers folder for code modularization.
+-- Use this in resume.
+
+## Router.route
+
+## Multer
+--Multer is a package used for uploading/playing with the files at the backend.
+-- To take files from frontend, we use enctype = "multipart/form-data" in from tag.
+
+## .env 
+--Environment Variable file is used to store credintials which we dont want to disclose anywhere in the code.
+--contents of .env file are available throughout the project, the only thing we need a package :-
+  ## dotenv
+  It is a zero dependency module that loads enviroment variables from .env file into process.env
+  There is no space between code in .env file.
+  How to use : Write at top of file :- require("dotenv").config()
+
+## Cloudinary (CLOUD)
+--We will use cloudinary with multer
+1. npm i cloudinary@1.41.0
+2. npm i multer-storage-cloudinary
+ # cloudinary-storage-cloudinary has dependancy with cloudinary's lower version. so we used :- npm install cloudinary@1.41.0
+
+ # Create a new file : cloaudConfig.js : TO connect backend with cloudinary.
+ - YOU CAN GIVE ANYNAME TO .ENV VARIABLES BUT CONFIG VARIABLES SHOULD BE USED SAME AS WE HAVE USED.
+ --storage and cloudinary are exported and required in (listing.js to create new and adding url from cloud after uploading image to cloud.) and (listing.js to edit image)
+ -- We have used await updatedListing.save() --> Its good to see.
+ -- We have also applied condition if typeof req.file != undefined
+  *    --------First of all upload the file, then only validate the listing. Because when multipart/form-data is sent then multer parses data then the req.body and req.file. If validation occurs before uploading ( multer's task) then req.body and req.file are undefined.
+ 
+
+ ## Mapbox API for  Maps implementation 
+
+ ## connect-mongo :- 
+ Sessions are saved in LocalStorage. It is not recomended for production level.
+ We use other storage methods to save the sessions. We are using connect-mongo.
+ The documentation are there on the npm website.
+We have to require the connect-mongo package after requiring the session
+You can require it as MongoStore
+# See details about touchAfter
+
+## Add node version in engines  to package.json before deploying the project
+
+##
+
+

@@ -1,0 +1,58 @@
+<% layout('/layouts/boilerplate') %>
+<body>
+    
+    <div class="row">
+        <div class="col-8 offset-2">
+            <br><br>
+            <h3>Create a new Listing</h3>
+            <form action="/listing" method="POST" novalidate class="needs-validation" enctype="multipart/form-data" >
+                <div class="mb-3">
+                    <label for="title">Title</label>
+                    <input type="text" placeholder="Enter Tittle" name="formData[title]" id="title" class="form-control" required>
+                    <div class="invalid-feedback">Please Enter a Title</div>
+                    <div class="valid-feedback">Accepted</div>
+                </div>
+                <div class="mb-3">
+                    <label for="description">Description</label>
+                    <input type="text" placeholder="Enter Description" name="formData[description]" id="description" class="form-control" required>
+                    <div class="invalid-feedback">Kindly add Description</div>
+                    <div class="valid-feedback">Accepted</div>
+                </div>
+                <div class="mb-3">
+                    <label for="url">Enter Image URL/Link</label>
+                    <input type="text" name="formData[image]" id='url' placeholder="Enter Image Url/Link" class="form-control" >
+                </div>
+
+                <div class="mb-3">
+                    <label for="url">Enter Image URL/Link</label>
+                    <input type="file" name="formData[image]" id='url' placeholder="Enter Image Url/Link" class="form-control" >
+                </div>
+
+                <div class="row">
+                    <div class="mb-3 col-md-4">
+                        <label for="price">Price</label>
+                        <input type="number" placeholder="Enter Price" name="formData[price]" id="price" class="form-control" required>
+                        <div class="invalid-feedback">Kindly Enter valid Price</div>
+                        <div class="valid-feedback">Accepted</div>
+                    </div>
+                    <div class="mb-3 col-md-8">
+                        <label for="country">Country</label>
+                    <input type="text" name="formData[country]" placeholder="Enter Your Country" id="country" class="form-control" required>
+                    <div class="invalid-feedback">Kindly Enter Country</div>
+                    <div class="valid-feedback">Accepted</div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="location" class="form-label">Location</label>
+                    <input type="text" name="formData[location]" placeholder="Enter Your Location" id="location" class="form-control" required>
+                    <div class="invalid-feedback">Insert Valid Location</div>
+                    <div class="valid-feedback">Accepted</div>
+                </div>
+               <br>
+                <button class="btn btn-dark add-btn">Add</button>
+            </form> 
+            <br>
+        </div>
+    </div>
+</body>
