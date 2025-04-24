@@ -114,7 +114,7 @@ app.get('/testListing',wrapAsync(async (req,res) => {
 }));
 
 app.get('/', (req,res) => { 
-    res.send("This is  root page");
+    res.redirect("/listing");
 })
 app.all("*", (req,res, next) =>{
     next(new ExpressError(404, "Page not Found!"));
